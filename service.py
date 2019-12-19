@@ -13,7 +13,7 @@ from processing.validator import validate_file
 
 app = Flask(__name__)
 
-## Logic for running program in dev
+## Logic for running program in dev, comment out when hosting as a docker image to sesam
 try:
     with open("helpers.json", "r") as stream:
         env_vars = stream.read()
@@ -23,7 +23,7 @@ try:
         os.environ['host'] = env_vars[61:78]
         os.environ['share'] = env_vars[61:78]
         stream.close()
-except OSError as e:
+except Exception as e:
     logging.info("Using env vars defined in SESAM")
 
 ## Helpers

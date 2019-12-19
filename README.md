@@ -6,6 +6,11 @@ python3
 ## API Capabalities
 GET
 
+
+## Caveats :
+When parsing xml files, remember to provide the query parameter `xml_path=<parent-element>` to make sure the xml_parser class defined in /processing/xml.py parses from the right dimension in the provided file. 
+
+
 ## How to:
 
 *Run program in development*
