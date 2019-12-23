@@ -130,7 +130,7 @@ def get_files(path):
                         xml_file_content = request_file(config, validate_filename, file_path, conn)
                         parsed_result = parse(xml_path, xml_file_content)
                         logger.info("Parsing functionality passed")
-                        parsed_content.append(parsed_result)
+                        parsed_content.append(parsed_result[0])
                 
             if validate_filename.lower() == "no":
                 xml_files = list_files(path, config, conn)
@@ -144,10 +144,10 @@ def get_files(path):
                         xml_file_content = request_file(config, validate_filename, file_path, conn)
                         parsed_result = parse(xml_path, xml_file_content)
                         logger.info("Parsing functionality passed")
-                        parsed_content.append(parsed_result)
+                        parsed_content.append(parsed_result[0])
                 
             conn.close()
-            logger.info(f"Streaming parsed files {parsed_content} to SESAM")
+            logger.info(f"Streaming parsed files to SESAM")
             return Response(stream_json(parsed_content), mimetype='application/json')      
 
         if request.args["type"].lower() == "csv":
@@ -162,10 +162,10 @@ def get_files(path):
                     file_path = f"{path}/{csv_file.filename}"
                     csv_file_content = request_file(config, validate_filename, file_path, conn)
                     parsed_file = parse_csv(csv_file_content)
-                    parsed_content.append(parsed_file)
+                    parsed_content.append(parsed_file[0])
 
             conn.close()
-            logger.info(f"Streaming parsed files {parsed_content} to SESAM")
+            logger.info(f"Streaming parsed files to SESAM")
             return Response(stream_json(parsed_content), mimetype='application/json')      
 
     except Exception as e:
