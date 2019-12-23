@@ -1,4 +1,5 @@
 # Cifs-csv-xml-validator
+Connector for smb connection, csv and xml parsing and xml validation
 
 ## Prerequisites
 python3
