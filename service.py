@@ -6,10 +6,9 @@ import os
 import sys
 from processing.feature import dict_merger, stream_json
 from sesamutils import VariablesConfig
-from processing.cifs import request_file, request_files
-from processing.xml import XmlParser
+from processing.cifs import request_file, list_files
+from processing.xml import parse
 from processing.csv import parse_csv
-from processing.validator import validate_file  
 
 app = Flask(__name__)
 
@@ -24,7 +23,7 @@ try:
         os.environ['share'] = env_vars[61:78]
         stream.close()
 except Exception as e:
-    logging.info("Using env vars defined in SESAM")
+    app.logger.info("Using env vars defined in SESAM")
 
 ## Helpers
 required_env_vars = ["username", "password", "hostname", "host", "share"]
@@ -47,84 +46,122 @@ def index():
 def get_file(path):
     try:
         if request.args["type"].lower() == "xml":
-            if request.args["validate"].lower() == "yes":
-                parser = XmlParser(request.args) # This needs the query parameter xml_path to work
-                xml_file = request_file(config, path)
-                parsed_file = parser.parse(xml_file)
+            xml_path = request.args["xml_path"] # For the xml parser...
+            validate_filename = str(request.args["validate"])
+            
+            if request.args["validate"].lower() != "no":
+                try:
+                    app.logger.info(f"Validating against file : {validate_filename}")
+                    xml_file = request_file(config, validate_filename, path)
+                    app.logger.info("Cifs functionality passed")
+                except Exception as e:
+                    app.logger.error(f"Cifs failing with error : {e}")
+                try:
+                    parsed_file = parse(xml_path, xml_file)
+                    app.logger.info("Parsing functionality passed")
+                except Exception as e:
+                    app.logger.error(f"Xml parsing failing with error : {e}")
+
                 return Response(stream_json(parsed_file), mimetype='application/json')
+            
             if request.args["validate"].lower() == "no":
-                parser = XmlParser(request.args) # This needs the query parameter xml_path to work
-                xml_file = request_file(config, path)
-                parsed_file = parser.parse(xml_file)
+                try:
+                    xml_file = request_file(config, validate_filename, path)
+                    app.logger.info("Cifs functionality passed")
+                except Exception as e:
+                    app.logger.error(f"Cifs failing with error : {e}")
+                try:
+                    parsed_file = parse(xml_path, xml_file)
+                    app.logger.info("Parsing functionality passed")
+                except Exception as e:
+                    app.logger.error(f"Xml parsing failing with error : {e}")
+                
                 return Response(stream_json(parsed_file), mimetype='application/json')
+            
             else:
-                logging.warning("Please provide the correct options for the query parameter 'validate'. Either 'yes' or 'no'")
+                app.logger.warning("Please provide the correct options for the query parameter 'validate'. Either 'yes' or 'no'")
 
         if request.args["type"].lower() == "csv":
-            csv_file = request_file(config, path)
+            validate_filename = str(request.args["validate"])
+            csv_file = request_file(config, validate_filename, path)
+            app.logger.info("Cifs functionality passed")
             parsed_file = parse_csv(csv_file)
+            app.logger.info("Parsing functionality passed")
             return Response(stream_json(parsed_file), mimetype='application/json')
 
         else:
-            logging.warning("Please provide the correct options for the query parameter 'type'. Either 'xml' or 'csv'")
+            app.logger.warning("Please provide the correct options for the query parameter 'type'. Either 'xml' or 'csv'")
 
     except Exception as e:
-        logging.error(f"Failed with error : {e}")
+        app.logger.error(f"Failed with error : {e}")
         
-    finally:
-        return jsonify({"This is an error response": "Error"})
-
 
 @app.route("/files/<path:path>", methods=['GET'])
 def get_files(path):
     try:
         if request.args["type"].lower() == "xml":
-            if request.args["validate"].lower() == "yes":
-                parser = XmlParser(request.args) # This needs the query parameter xml_path to work
-                xml_files = request_files(config, path)
+            xml_path = request.args["xml_path"] # For the xml parser...
+            validate_filename = request.args["validate"]
+            if request.args["validate"].lower() != "no":
+                app.logger.info(f"Validating against file : {validate_filename}")
+                xml_files = list_files(path, config)
+                app.logger.info("Cifs functionality passed")
                 parsed_xml = []
                 for xml_file in xml_files:
-                    try:
-                        parsed_result = parser.parse(xml_file)
+                    if xml_file.filename[-3:] != 'xml':
+                        app.logger.info(f"skipping non xml file")
+                    else:
+                        app.logger.info(f"writing file name to process : {xml_file.filename}")
+                        file_path = f"{path}/{xml_file.filename}"
+                        xml_file_content = request_file(config, validate_filename, file_path)
+                        parsed_result = parse(xml_path, xml_file_content)
+                        app.logger.info("Parsing functionality passed")
                         parsed_xml.append(parsed_result)
-                    except Exception as e:
-                        logging.error(f"Skipping xml file with error : {e}")
-                
+                   
                 return Response(stream_json(parsed_xml), mimetype='application/json')
             
             if request.args["validate"].lower() == "no":
-                parser = XmlParser(request.args) # This needs the query parameter xml_path to work
-                xml_files = request_files(config, path)
+                xml_files = list_files(path, config)
+                app.logger.info("Cifs functionality passed")
                 parsed_xml = []
                 for xml_file in xml_files:
-                    try:
-                        parsed_result = parser.parse(xml_file)
+                    if xml_file.filename[-3:] != 'xml':
+                        app.logger.info(f"skipping non xml file")
+                    else:
+                        app.logger.info(f"writing file name to process : {xml_file.filename}")
+                        file_path = f"{path}/{xml_file.filename}"
+                        xml_file_content = request_file(config, validate_filename, file_path)
+                        parsed_result = parse(xml_path, xml_file_content)
+                        app.logger.info("Parsing functionality passed")
                         parsed_xml.append(parsed_result)
-                    except Exception as e:
-                        logging.error(f"Skipping xml file with error : {e}")
-                
+                    
                 return Response(stream_json(parsed_xml), mimetype='application/json')
             
             else:
-                logging.warning("Please provide the correct options for the query parameter 'validate'. Either 'yes' or 'no'")
+                app.logger.warning("Please provide the correct options for the query parameter 'validate'. Either 'yes' or 'no'")
 
         if request.args["type"].lower() == "csv":
-            csv_files = request_files(config, path)
+            validate_filename = request.args["validate"]
+            csv_files = list_files(path, config)
+            app.logger.info("Cifs functionality passed")
             parsed_csvs = []
             for csv_file in csv_files:
-                try:
-                    parsed_file = parse_csv(csv_file)
+                if csv_file.filename[-3:] != 'csv':
+                    app.logger.info(f"skipping non csv file")
+                else:
+                    app.logger.info(f"writing file name to process : {csv_file.filename}")
+                    file_path = f"{path}/{csv_file.filename}"
+                    csv_file_content = request_file(config, validate_filename, file_path)
+                    parsed_file = parse_csv(csv_file_content)
                     parsed_csvs.append(parsed_file)
-                except Exception as e:
-                    logging.error(f"Skipping csv file with error : {e}")
-
+                
             return Response(stream_json(parsed_csvs), mimetype='application/json')
            
         else:
-            logging.warning("Please provide the correct options for the query parameter 'type'. Either 'xml' or 'csv'")
+            app.logger.warning("Please provide the correct options for the query parameter 'type'. Either 'xml' or 'csv'")
 
     except Exception as e:
-        logging.warning(f"Failed with error : {e}")
+        app.logger.warning(f"Failed with error : {e}")
 
 
 if __name__ == '__main__':

@@ -3,5 +3,4 @@ requests
 pytest
 sesamutils
 pysmb
-lxml
 xmltodict==0.11.0

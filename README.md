@@ -8,7 +8,10 @@ GET
 
 
 ## Caveats :
-When parsing xml files, remember to provide the query parameter `xml_path=<parent-element>` to make sure the xml_parser class defined in /processing/xml.py parses from the right dimension in the provided file. 
+When parsing xml files, remember to provide the query parameter `xml_path=<parent-element>` to make sure the xml_parser function defined in /processing/xml.py parses from the right dimension in the provided file. 
+
+*Working functionality*
+- xml file reading works. Validation needs to be validated and csv aswell.
 
 
 ## How to:
@@ -54,6 +57,7 @@ Make sure the required env variables are defined.
         "password": "$SECRET(password)",
         "username": "$ENV(username)",
         "hostname": "$ENV(hostname)",
+        "schema_path": "$ENV(<path to schema folder>)",
         "host": "$ENV(host)",
         "share": "$ENV(share)"
         },
@@ -73,7 +77,7 @@ Make sure the required env variables are defined.
     "source": {
         "type": "json",
         "system": "cifs-xml-csv-validator",
-        "url": "/file/<url-to-file>?type=xml&validate=yes"
+        "url": "/file/<url-to-file>?type=xml&validate=no&xml_path=<parent-element>"
     },
     "transform": {
         "type": "dtl",
