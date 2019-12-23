@@ -53,7 +53,7 @@ def get_file(path):
             xml_path = request.args["xml_path"] # For the xml parser...
             validate_filename = str(request.args["validate"])
             
-            if request.args["validate"].lower() != "no":
+            if validate_filename.lower() != "no":
                 try:
                     logger.info(f"Validating against file : {validate_filename}")
                     xml_file = request_file(config, validate_filename, path, conn)
@@ -70,7 +70,7 @@ def get_file(path):
 
                 return Response(stream_json(parsed_file), mimetype='application/json')
             
-            if request.args["validate"].lower() == "no":
+            if validate_filename.lower() == "no":
                 try:
                     xml_file = request_file(config, validate_filename, path, conn)
                     logger.info("Cifs functionality passed")
@@ -110,13 +110,14 @@ def get_file(path):
 
 @app.route("/files/<path:path>", methods=['GET'])
 def get_files(path):
+    parsed_content = []
     try:
         conn = create_connection(config)
-        parsed_content = []
         if request.args["type"].lower() == "xml":
             xml_path = request.args["xml_path"] # For the xml parser...
-            validate_filename = request.args["validate"]
-            if request.args["validate"].lower() != "no":
+            validate_filename = str(request.args["validate"])
+            
+            if validate_filename.lower() != "no":
                 logger.info(f"Validating against file : {validate_filename}")
                 xml_files = list_files(path, config, conn)
                 logger.info("Cifs functionality passed")
@@ -125,15 +126,13 @@ def get_files(path):
                         logger.info(f"skipping non xml file")
                     else:
                         logger.info(f"writing file name to process : {xml_file.filename}")
-                        file_path = f"/{path}/{xml_file.filename}"
+                        file_path = f"{path}/{xml_file.filename}"
                         xml_file_content = request_file(config, validate_filename, file_path, conn)
                         parsed_result = parse(xml_path, xml_file_content)
                         logger.info("Parsing functionality passed")
                         parsed_content.append(parsed_result)
                 
-                conn.close()
-            
-            if request.args["validate"].lower() == "no":
+            if validate_filename.lower() == "no":
                 xml_files = list_files(path, config, conn)
                 logger.info("Cifs functionality passed")
                 for xml_file in xml_files:
@@ -141,20 +140,18 @@ def get_files(path):
                         logger.info(f"skipping non xml file")
                     else:
                         logger.info(f"writing file name to process : {xml_file.filename}")
-                        file_path = f"/{path}/{xml_file.filename}"
+                        file_path = f"{path}/{xml_file.filename}"
                         xml_file_content = request_file(config, validate_filename, file_path, conn)
                         parsed_result = parse(xml_path, xml_file_content)
                         logger.info("Parsing functionality passed")
                         parsed_content.append(parsed_result)
                 
-                conn.close()     
-            
-            else:
-                logger.warning("Please provide the correct options for the query parameter 'validate'. Either 'yes' or 'no'")
-                conn.close()
+            conn.close()
+            logger.info(f"Streaming parsed files {parsed_content} to SESAM")
+            return Response(stream_json(parsed_content), mimetype='application/json')      
 
         if request.args["type"].lower() == "csv":
-            validate_filename = request.args["validate"]
+            validate_filename = str(request.args["validate"])
             csv_files = list_files(path, config, conn)
             logger.info("Cifs functionality passed")
             for csv_file in csv_files:
@@ -162,18 +159,14 @@ def get_files(path):
                     logger.info(f"skipping non csv file")
                 else:
                     logger.info(f"writing file name to process : {csv_file.filename}")
-                    file_path = f"/{path}/{csv_file.filename}"
+                    file_path = f"{path}/{csv_file.filename}"
                     csv_file_content = request_file(config, validate_filename, file_path, conn)
                     parsed_file = parse_csv(csv_file_content)
                     parsed_content.append(parsed_file)
 
-            conn.close() 
-           
-        else:
-            logger.warning("Please provide the correct options for the query parameter 'type'. Either 'xml' or 'csv'")
             conn.close()
-        
-        return Response(stream_json(parsed_content), mimetype='application/json')
+            logger.info(f"Streaming parsed files {parsed_content} to SESAM")
+            return Response(stream_json(parsed_content), mimetype='application/json')      
 
     except Exception as e:
         logger.warning(f"Failed with error : {e}")

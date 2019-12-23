@@ -1,6 +1,6 @@
 import csv
 import json
-from service import logger
+import logging
 
 def parse_csv(csv_file):
     json_file = None
@@ -17,5 +17,5 @@ def parse_csv(csv_file):
         return json_file
 
     except Exception as e:
-        logger.error(f"Failing with error : {e}")
+        logging.error(f"Failing with error : {e}")
 

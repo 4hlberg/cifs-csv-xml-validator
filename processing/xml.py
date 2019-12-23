@@ -1,6 +1,6 @@
 from sesamutils import Dotdictify
 import xmltodict
-from service import logger
+import logging
 
 def parse(xml_path, stream):
     
@@ -17,13 +17,13 @@ def parse(xml_path, stream):
             imbedded_xml = xmltodict.parse("<html>" + root_element["ichicsr"]["safetyreport"]["patient"]["parent"]["parentmedicalrelevanttext"] + "</html>")
             root_element["ichicsr"]["safetyreport"]["patient"]["parent"]["parentmedicalrelevanttext"] = imbedded_xml["html"]
         except TypeError as e:
-            logger.info(f"None imbedded xml defined. Failing with error: {e}")
+            logging.info(f"None imbedded xml defined. Failing with error: {e}")
         except ExpatError as e:
-            logger.info(f"None imbedded xml defined. Failing with error: {e}")
+            logging.info(f"None imbedded xml defined. Failing with error: {e}")
         except KeyError as e:
-            logger.info(f"None imbedded xml element of {e}")
+            logging.info(f"None imbedded xml element of {e}")
         except UnboundLocalError as e:
-            logger.info(f"None imbedded xml element of {e}")
+            logging.info(f"None imbedded xml element of {e}")
 
         l = [root_element]
 

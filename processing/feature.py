@@ -1,6 +1,6 @@
 import os
 import json
-from service import logger
+import logging
 
 ## Merge helper function
 def dict_merger(dict1, dict2): 
@@ -9,7 +9,7 @@ def dict_merger(dict1, dict2):
 
 ##Helper function for yielding on batch fetch
 def stream_json(entities):
-    logger.info("streaming started")
+    logging.info("streaming started")
     try:
         first = True
         yield '['
@@ -22,6 +22,6 @@ def stream_json(entities):
             yield json.dumps(row)
         yield ']'
     except Exception as e:
-        logger.error(f"Exiting with error : {e}")
-    logger.info("stream ended")
+        logging.error(f"Exiting with error : {e}")
+    logging.info("stream ended")
 
