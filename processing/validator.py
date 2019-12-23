@@ -1,14 +1,14 @@
 from lxml import etree, objectify
 from lxml.etree import XMLSyntaxError
-import logging
+from service import logger
 
 def validate_file(xml_file, xsd_file):
     try:
         try:
             xmlschema = etree.XMLSchema(file=xsd_file)
-            logging.info(f"This is the xmlschema : {xmlschema}")
+            logger.info(f"This is the xmlschema : {xmlschema}")
             parser = objectify.makeparser(schema=xmlschema)
-            logging.info(f"Next step...")
+            logger.info(f"Next step...")
             objectify.fromstring(xml_file, parser)
         except Exception as e:
             return f"Failed with error : {e}"
