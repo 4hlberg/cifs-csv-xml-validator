@@ -17,8 +17,7 @@ def create_connection(config):
         return "Invalid credentials provided for fileshare", 500
 
     logging.info("Successfully connected to SMB host.")
-    return connection
-
+    return connection 
 
 def request_file(config, val_file_name, path, conn):
     try:
@@ -37,32 +36,32 @@ def request_file(config, val_file_name, path, conn):
         logging.info(f"Share: {share.name}  {share.type}    {share.comments}")
 
     try:
-        xml_content = None
+        file_content = None
         file_obj = tempfile.NamedTemporaryFile()
         conn.retrieveFile(config.share, path, file_obj)
         logging.info("Completed file downloading...")
         if val_file_name != "no":
             logging.info('Validator initiated...')     
             file_obj.seek(0)
-            xml_content = file_obj.read().decode()    
+            file_content = file_obj.read().decode()    
             schema_obj = tempfile.NamedTemporaryFile()
             conn.retrieveFile(config.share, f"{schema_path}/{val_file_name}", schema_obj)
             schema_obj.seek(0)
             schema_content = schema_obj.read().decode()
-            validation_resp = validate_file(xml_content, schema_content)
+            validation_resp = validate_file(file_content, schema_content)
             #logging.debug(f"This is the response from validation func : {validation_resp}")
             file_obj.close()
             schema_obj.close()
             if validation_resp == "Your file was validated :)":
-                return xml_content
+                return file_content
             else:
                 logging.error('Validation unsuccessfull! :(')
                 sys.exit(1)
         else:  
             file_obj.seek(0)
-            xml_content = file_obj.read().decode()
+            file_content = file_obj.read().decode()
             file_obj.close()   
-            return xml_content           
+            return file_content           
     except Exception as e:
         logging.error(f"Failed to get file from fileshare. Error: {e}")
         logging.debug("Files found on share:")
