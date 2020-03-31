@@ -12,7 +12,10 @@ GET
 When parsing xml files, remember to provide the query parameter `xml_path=<parent-element>` to make sure the xml_parser function defined in /processing/xml.py parses from the right dimension in the provided file. 
 
 *Working functionality*
-- xml file reading works. Validation needs to be validated and csv aswell.
+- xml /file/ and /files/ reading works.
+- Single file reading of csv file works '/file/' 
+- Multiple csv file reading needs to be validated '/files'
+- Validation needs to be validated.
 
 
 ## How to:
@@ -90,6 +93,40 @@ Make sure the required env variables are defined.
     }
     }
 ```
+
+#### Example Pipe config for csv :
+
+```
+    {
+    "_id": "csv-file-foobar",
+    "type": "pipe",
+    "source": {
+        "type": "csv",
+        "system": "cifs-xml-csv-validator",
+        "auto_dialect": true,
+        "delimiter": ";",
+        "dialect": "excel",
+        "encoding": "utf-8-sig",
+        "has_header": true,
+        "preserve_empty_strings": false,
+        "primary_key": "This is awesome",
+        "url": "/file/Folder_with_file/this_is_a_csv.csv?type=csv&validate=no"
+    },
+    "transform": {
+        "type": "dtl",
+        "rules": {
+        "default": [
+            ["copy", "*"],
+            ["add", "rdf:type",
+            ["ni", "some_ni"]
+            ]
+        ]
+        }
+    },
+    "add_namespaces": true
+    }
+```
+
 
 ## Routes
 

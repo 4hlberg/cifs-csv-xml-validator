@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, stream_with_context, send_file
 import json
 import requests
 import os
@@ -11,8 +11,6 @@ from processing.csv import parse_csv
 
 app = Flask(__name__)
 logger = sesam_logger("Steve the logger", app=app)
-
-## commonLexicon_4.0.xsd
 
 ## Logic for running program in dev, comment out when hosting as a docker image to sesam
 try:
@@ -91,13 +89,19 @@ def get_file(path):
                 logger.warning("Please provide the correct options for the query parameter 'validate'. Either 'yes' or 'no'")
 
         if request.args["type"].lower() == "csv":
-            validate_filename = str(request.args["validate"])
-            csv_file = request_file(config, validate_filename, path, conn)
-            logger.info("Cifs functionality passed")
-            conn.close()
-            parsed_file = parse_csv(csv_file)
-            logger.info("Parsing functionality passed")
-            return Response(stream_json(parsed_file), mimetype='application/json')
+            path_parts = path.split("/")
+            file_name = path_parts[len(path_parts)-1]
+            try:
+                with open('local_file', 'wb') as fp:
+                    conn.retrieveFile(config.share, path, fp)
+                    logger.info("Completed file downloading...", )
+                return send_file('local_file', attachment_filename=file_name)
+            except Exception as e:
+                logger.error(f"Failed to get file from fileshare. Error: {e}")
+            finally:
+                conn.close()
+                os.remove("local_file")
+            abort(500)
 
         else:
             conn.close()
