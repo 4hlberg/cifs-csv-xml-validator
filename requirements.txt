@@ -4,3 +4,5 @@ pytest
 sesamutils
 pysmb
 xmltodict==0.11.0
+dicttoxml==1.7.4
+urllib3

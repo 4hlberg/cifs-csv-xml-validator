@@ -6,6 +6,7 @@ python3
 
 ## API Capabalities
 GET
+POST
 
 
 ## Caveats :
@@ -15,6 +16,7 @@ When parsing xml files, remember to provide the query parameter `xml_path=<paren
 - xml /file/ and /files/ reading works.
 - Single file reading of csv file works '/file/' 
 - Multiple csv file reading needs to be validated '/files'
+- /send_file/ works. Use in pipe that gets a URL from a sink pipe (http_endpoint).
 - Validation needs to be validated.
 
 
@@ -32,9 +34,15 @@ This repo uses the file ```package.json``` and [yarn](https://yarnpkg.com/lang/e
     "password": "some password",
     "hostname": "some hostname",
     "host": "some host",
-    "share": "some share"
+    "share": "some share",
+    "schema_path": "schema path",
+    "target_folder": "your folder",
+    "sesam_jwt": "sesam jwt",
+    "ms_access_token":"some access token for microservice if needed",
+    "ms_url": "some microservice base url if needed"
 }
 ```
+
 3. run:
     ```
         yarn install
@@ -63,7 +71,12 @@ Make sure the required env variables are defined.
         "hostname": "$ENV(hostname)",
         "schema_path": "$ENV(<path to schema folder>)",
         "host": "$ENV(host)",
-        "share": "$ENV(share)"
+        "share": "$ENV(share)",
+        "schema_path": "$ENV(schema path)",
+        "target_folder": "$ENV(your folder)",
+        "sesam_jwt": "$SECRET(sesam jwt)",
+        "ms_access_token":"$SECRET(some access token for microservice if needed)",
+        "ms_url": "$ENV(some microservice base url if needed)"
         },
         "image": "sesamcommunity/cifs-xml-csv-validator:<some tag>",
         "port": 5000
@@ -133,4 +146,5 @@ Make sure the required env variables are defined.
 ```
     /file/<path:path>
     /files/<path:path>
+    /send_file/<path:path>
 ```
