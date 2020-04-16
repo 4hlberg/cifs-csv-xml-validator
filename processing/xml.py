@@ -1,6 +1,9 @@
 from sesamutils import Dotdictify
 import xmltodict
 import logging
+import json
+import dicttoxml
+from xml.dom.minidom import parseString
 
 def parse(xml_path, stream):
     
@@ -28,3 +31,8 @@ def parse(xml_path, stream):
         l = [root_element]
 
     return l
+
+def convert_to_xml(json_response):
+    xml = dicttoxml.dicttoxml(json_response, attr_type=False)
+    formatet_xml = parseString(xml)
+    return formatet_xml.toprettyxml()
