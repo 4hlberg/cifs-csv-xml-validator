@@ -36,8 +36,6 @@ This repo uses the file ```package.json``` and [yarn](https://yarnpkg.com/lang/e
     "host": "some host",
     "share": "some share",
     "schema_path": "schema path",
-    "target_folder": "your folder",
-    "sesam_jwt": "sesam jwt",
     "ms_access_token":"some access token for microservice if needed",
     "ms_url": "some microservice base url if needed"
 }
@@ -73,8 +71,6 @@ Make sure the required env variables are defined.
         "host": "$ENV(host)",
         "share": "$ENV(share)",
         "schema_path": "$ENV(schema path)",
-        "target_folder": "$ENV(your folder)",
-        "sesam_jwt": "$SECRET(sesam jwt)",
         "ms_access_token":"$SECRET(some access token for microservice if needed)",
         "ms_url": "$ENV(some microservice base url if needed)"
         },

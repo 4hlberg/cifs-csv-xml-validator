@@ -106,8 +106,8 @@ def list_files(path, config, conn):
     return file_list
 
 
-def post_file(conn, xml_file, config, xml_file_name):
+def post_file(conn, path, xml_file, config, xml_file_name):
     logging.info('Sending file to fileshare...')
-    conn.storeFile(config.share, f"{config.target_folder}/{xml_file_name}", xml_file)
+    conn.storeFile(config.share, f"{path}/{xml_file_name}", xml_file)
     
  

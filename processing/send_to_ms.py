@@ -1,11 +1,11 @@
 import requests
 import tempfile
 
-def sending_file_to_ms(file_to_send, file_obj, header, ms_url):
+def sending_file_to_ms(xml_file_name, file_obj, header, ms_url):
     return_string = None
-    _id = str(file_to_send.filename).split(".")[0]
+    _id = str(xml_file_name).split(".")[0]
     files = {
-        'Data': (f"{file_to_send.filename}", file_obj.read(), "application/xml")
+        'Data': (f"{xml_file_name}", file_obj.read(), "application/xml")
     }
     payload = {
         'RapportId': _id
