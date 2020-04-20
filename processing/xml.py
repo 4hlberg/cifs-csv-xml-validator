@@ -33,6 +33,6 @@ def parse(xml_path, stream):
     return l
 
 def convert_to_xml(json_response):
-    xml = dicttoxml.dicttoxml(json_response, attr_type=False)
+    xml = dicttoxml.dicttoxml(json_response, attr_type=False, item_func=lambda x: x)
     formatet_xml = parseString(xml)
     return formatet_xml.toprettyxml()
