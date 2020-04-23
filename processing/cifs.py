@@ -9,7 +9,7 @@ from processing.validator import validate_file
 
 def create_connection(config):
     connection = SMBConnection(config.username, config.password, socket.gethostname(),
-                         config.hostname, is_direct_tcp=True, use_ntlm_v2=True)
+                               config.hostname, is_direct_tcp=True, use_ntlm_v2=True)
 
     if not connection.connect(config.host, 445):
         logging.error("Failed to authenticate with the provided credentials")
@@ -17,7 +17,8 @@ def create_connection(config):
         return "Invalid credentials provided for fileshare", 500
 
     logging.info("Successfully connected to SMB host.")
-    return connection 
+    return connection
+
 
 def request_file(config, val_file_name, path, conn):
     try:
@@ -25,7 +26,7 @@ def request_file(config, val_file_name, path, conn):
             schema_path = config.schema_path
     except AttributeError:
         schema_path = 'Denmark'
-    
+
     logging.info(f"Processing request for path '{path}'.")
 
     logging.info("Successfully connected to SMB host.")
@@ -41,15 +42,14 @@ def request_file(config, val_file_name, path, conn):
         conn.retrieveFile(config.share, path, file_obj)
         logging.info("Completed file downloading...")
         if val_file_name != "no":
-            logging.info('Validator initiated...')     
+            logging.info('Validator initiated...')
             file_obj.seek(0)
-            file_content = file_obj.read().decode()    
+            file_content = file_obj.read().decode()
             schema_obj = tempfile.NamedTemporaryFile()
             conn.retrieveFile(config.share, f"{schema_path}/{val_file_name}", schema_obj)
             schema_obj.seek(0)
             schema_content = schema_obj.read().decode()
             validation_resp = validate_file(file_content, schema_content)
-            #logging.debug(f"This is the response from validation func : {validation_resp}")
             file_obj.close()
             schema_obj.close()
             if validation_resp == "Your file was validated :)":
@@ -57,17 +57,18 @@ def request_file(config, val_file_name, path, conn):
             else:
                 logging.error('Validation unsuccessfull! :(')
                 sys.exit(1)
-        else:  
+        else:
             file_obj.seek(0)
             file_content = file_obj.read().decode()
-            file_obj.close()   
-            return file_content           
+            file_obj.close()
+            return file_content
     except Exception as e:
         logging.error(f"Failed to get file from fileshare. Error: {e}")
         logging.debug("Files found on share:")
         file_list = conn.listPath(os.environ.get("share"), "/")
         for f in file_list:
-            logging.debug('file: %s (FileSize:%d bytes, isDirectory:%s)' % (f.filename, f.file_size, f.isDirectory))
+            logging.debug('file: %s (FileSize:%d bytes, isDirectory:%s)' % (
+                f.filename, f.file_size, f.isDirectory))
 
 
 def request_file_for_connector(config, path, conn):
@@ -80,15 +81,16 @@ def request_file_for_connector(config, path, conn):
         file_obj = tempfile.NamedTemporaryFile()
         conn.retrieveFile(config.share, path, file_obj)
         logging.info("Completed file downloading...")
-        file_obj.seek(0)  
-        return file_obj           
-    
+        file_obj.seek(0)
+        return file_obj
+
     except Exception as e:
         logging.error(f"Failed to get file from fileshare. Error: {e}")
         logging.debug("Files found on share:")
         file_list = conn.listPath(os.environ.get("share"), "/")
         for f in file_list:
-            logging.debug('file: %s (FileSize:%d bytes, isDirectory:%s)' % (f.filename, f.file_size, f.isDirectory))
+            logging.debug('file: %s (FileSize:%d bytes, isDirectory:%s)' % (
+                f.filename, f.file_size, f.isDirectory))
 
 
 def list_files(path, config, conn):
@@ -109,5 +111,3 @@ def list_files(path, config, conn):
 def post_file(conn, path, xml_file, config, xml_file_name):
     logging.info('Sending file to fileshare...')
     conn.storeFile(config.share, f"{path}/{xml_file_name}", xml_file)
-    
- 

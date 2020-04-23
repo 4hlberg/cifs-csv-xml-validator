@@ -5,8 +5,9 @@ import json
 import dicttoxml
 from xml.dom.minidom import parseString
 
+
 def parse(xml_path, stream):
-    
+
     root_element = xmltodict.parse(stream)
 
     if xml_path is not None:
@@ -17,7 +18,8 @@ def parse(xml_path, stream):
             l = [Dotdictify(root_element).get(xml_path)]
     else:
         try:
-            imbedded_xml = xmltodict.parse("<html>" + root_element["ichicsr"]["safetyreport"]["patient"]["parent"]["parentmedicalrelevanttext"] + "</html>")
+            imbedded_xml = xmltodict.parse(
+                "<html>" + root_element["ichicsr"]["safetyreport"]["patient"]["parent"]["parentmedicalrelevanttext"] + "</html>")
             root_element["ichicsr"]["safetyreport"]["patient"]["parent"]["parentmedicalrelevanttext"] = imbedded_xml["html"]
         except TypeError as e:
             logging.info(f"None imbedded xml defined. Failing with error: {e}")
@@ -32,7 +34,33 @@ def parse(xml_path, stream):
 
     return l
 
+
 def convert_to_xml(json_response):
-    xml = dicttoxml.dicttoxml(json_response, attr_type=False, item_func=lambda x: x)
+    xml = dicttoxml.dicttoxml(
+        json_response, attr_type=False, item_func=lambda x: x)
+
     formatet_xml = parseString(xml)
     return formatet_xml.toprettyxml()
+
+
+def json2xml(json_obj, line_padding=""):
+    result_list = list()
+
+    json_obj_type = type(json_obj)
+
+    if json_obj_type is list:
+        for sub_elem in json_obj:
+            result_list.append(json2xml(sub_elem, line_padding))
+
+        return "\n".join(result_list)
+
+    if json_obj_type is dict:
+        for tag_name in json_obj:
+            sub_obj = json_obj[tag_name]
+            result_list.append("%s<%s>" % (line_padding, tag_name))
+            result_list.append(json2xml(sub_obj, "\t" + line_padding))
+            result_list.append("%s</%s>" % (line_padding, tag_name))
+
+        return "\n".join(result_list)
+
+    return "%s%s" % (line_padding, json_obj)
