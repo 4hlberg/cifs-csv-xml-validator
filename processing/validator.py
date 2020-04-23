@@ -2,6 +2,7 @@ from lxml import etree, objectify
 from lxml.etree import XMLSyntaxError
 import logging
 
+
 def validate_file(xml_file, xsd_file):
     try:
         try:

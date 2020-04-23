@@ -10,5 +10,5 @@
         "deploy": "",
         "install": "sudo pip3 install -r requirements.txt",
         "swagger": "python3 service.py"
-      }
-  }
+    }
+}

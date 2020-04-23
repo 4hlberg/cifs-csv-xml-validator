@@ -2,12 +2,14 @@ import os
 import json
 import logging
 
-## Merge helper function
-def dict_merger(dict1, dict2): 
-    res = {**dict1, **dict2} 
+
+# Merge helper function
+def dict_merger(dict1, dict2):
+    res = {**dict1, **dict2}
     return res
 
-##Helper function for yielding on batch fetch
+
+# Helper function for yielding on batch fetch
 def stream_json(entities):
     logging.info("streaming started")
     try:
@@ -18,10 +20,9 @@ def stream_json(entities):
                 yield ','
             else:
                 first = False
-            
+
             yield json.dumps(row)
         yield ']'
     except Exception as e:
         logging.error(f"Exiting with error : {e}")
     logging.info("stream ended")
-
