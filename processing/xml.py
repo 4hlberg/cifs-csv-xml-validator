@@ -45,22 +45,52 @@ def convert_to_xml(json_response):
 
 def json2xml(json_obj, line_padding=""):
     result_list = list()
-
     json_obj_type = type(json_obj)
 
     if json_obj_type is list:
-        for sub_elem in json_obj:
-            result_list.append(json2xml(sub_elem, line_padding))
-
-        return "\n".join(result_list)
+        if not json_obj:
+            json_obj == "empty"
+        else:
+            for sub_elem in json_obj:
+                result_list.append(json2xml(sub_elem, line_padding))
+            return "\n".join(result_list)
 
     if json_obj_type is dict:
         for tag_name in json_obj:
             sub_obj = json_obj[tag_name]
-            result_list.append("%s<%s>" % (line_padding, tag_name))
-            result_list.append(json2xml(sub_obj, "\t" + line_padding))
-            result_list.append("%s</%s>" % (line_padding, tag_name))
+            if str(sub_obj) == "None" or len(str(sub_obj)) == 0 or sub_obj == "empty":
+                pass
+            else:
+                if tag_name == "animalsigns" or tag_name == "animalsuspectdrug":
+                    for item in sub_obj:
+                        result_list.append("%s<%s>" %
+                                           (line_padding, tag_name))
+                        result_list.append(json2xml(item, "\t" + line_padding))
+                        result_list.append("%s</%s>" %
+                                           (line_padding, tag_name))
+                else:
+                    if type(sub_obj) is list:
+                        if not sub_obj:
+                            pass
+
+                        else:
+                            result_list.append("%s<%s>" %
+                                               (line_padding, tag_name))
+                            result_list.append(
+                                json2xml(sub_obj, "\t" + line_padding))
+                            result_list.append("%s</%s>" %
+                                               (line_padding, tag_name))
+                    else:
+                        result_list.append("%s<%s>" % (line_padding, tag_name))
+                        result_list.append(
+                            json2xml(sub_obj, "\t" + line_padding))
+                        result_list.append("%s</%s>" %
+                                           (line_padding, tag_name))
 
         return "\n".join(result_list)
 
-    return "%s%s" % (line_padding, json_obj)
+    if json_obj == "empty":
+        pass
+
+    else:
+        return "%s%s" % (line_padding, json_obj)
