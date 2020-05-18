@@ -11,7 +11,6 @@ from processing.cifs import request_file, list_files, create_connection, post_fi
 from processing.xml import parse, convert_to_xml, json2xml
 from processing.csv import parse_csv
 from processing.send_to_ms import sending_file_to_ms
-from processing.cleaning_json import clean_json
 
 app = Flask(__name__)
 logger = sesam_logger("Steve the logger", app=app)
@@ -213,8 +212,11 @@ def post_data(path):
                 xml_file_name = f"{entity.get('_id')}.xml"
                 list_of_animal_signs = []
                 del entity['_id']
+
+                xml_object = json2xml(entity)
+
                 xml_file.write(
-                    bytes(json2xml(entity), encoding='utf-8'))
+                    bytes(xml_object, encoding='utf-8'))
                 logger.info(f"xml file to send : {xml_file_name}")
                 xml_file.seek(0)
                 post_file(conn, path, xml_file, config, xml_file_name)
